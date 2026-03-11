@@ -20,6 +20,14 @@ jobs:
       - name: Rodar scanner de segurança
         run: python scan.py
 
+      - name: Gerar resumo da execução
+        run: |
+          echo "## Relatório da varredura" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- O scanner verificou o repositório em busca de credenciais expostas." >> $GITHUB_STEP_SUMMARY
+          echo "- O relatório detalhado foi salvo como artifact." >> $GITHUB_STEP_SUMMARY
+          echo "- Verifique também os logs da etapa 'Rodar scanner de segurança'." >> $GITHUB_STEP_SUMMARY
+
       - name: Salvar relatório de segurança
         uses: actions/upload-artifact@v4
         with:
