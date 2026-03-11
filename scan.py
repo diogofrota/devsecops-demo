@@ -1,4 +1,5 @@
 import re
+import json
 from pathlib import Path
 
 ARQUIVOS_PERMITIDOS = {".html", ".js", ".py", ".json", ".env", ".txt"}
@@ -31,28 +32,43 @@ def analisar_arquivo(caminho: Path):
                     "arquivo": str(caminho),
                     "linha": numero_linha,
                     "tipo": nome_padrao,
-                    "trecho": linha.strip()
+                    "trecho": linha.strip(),
+                    "severidade": "alta"
                 })
 
     return achados
 
 def main():
     print("Iniciando varredura de credenciais expostas...")
-    total_achados = 0
+    todos_achados = []
 
     for caminho in Path(".").rglob("*"):
         if caminho.is_file() and deve_analisar(caminho):
             resultados = analisar_arquivo(caminho)
 
             for item in resultados:
-                total_achados += 1
+                todos_achados.append(item)
                 print(f"[ALERTA] Tipo: {item['tipo']}")
                 print(f"Arquivo: {item['arquivo']}")
                 print(f"Linha: {item['linha']}")
                 print(f"Trecho: {item['trecho']}")
                 print("-" * 50)
 
-    print(f"Varredura finalizada. Total de achados: {total_achados}")
+    Path("reports").mkdir(exist_ok=True)
+
+    relatorio = {
+        "resumo": {
+            "total_achados": len(todos_achados),
+            "status": "credenciais expostas encontradas" if todos_achados else "nenhum achado"
+        },
+        "achados": todos_achados
+    }
+
+    with open("reports/credential_report.json", "w", encoding="utf-8") as arquivo:
+        json.dump(relatorio, arquivo, indent=2, ensure_ascii=False)
+
+    print(f"Varredura finalizada. Total de achados: {len(todos_achados)}")
+    print("Relatório salvo em reports/credential_report.json")
 
 if __name__ == "__main__":
     main()
