@@ -17,5 +17,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Rodar script Python
+      - name: Rodar scanner de segurança
         run: python scan.py
+
+      - name: Salvar relatório de segurança
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-seguranca
+          path: reports/credential_report.json
