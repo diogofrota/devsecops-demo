@@ -1,44 +1,42 @@
-name: Test Python Script
+name: DevSecOps Pipeline
 
 on:
   push:
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  run-python:
+  security-check:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código
+      - name: Checkout código
         uses: actions/checkout@v4
 
       - name: Configurar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: '3.10'
 
-      - name: Rodar scanner de segurança
+      - name: Instalar dependências
+        run: pip install openai
+
+      - name: Criar pasta de relatórios
+        run: mkdir -p reports
+
+      - name: Rodar scanner
         run: python scan.py
 
-      - name: Preparar entrada para agente de IA
+      - name: Preparar entrada da IA
         run: python prepare_ai_input.py
 
-      - name: Gerar resumo da execução
-        run: |
-          echo "## Relatório da varredura" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- O scanner verificou o repositório em busca de credenciais expostas." >> $GITHUB_STEP_SUMMARY
-          echo "- O relatório detalhado foi salvo como artifact." >> $GITHUB_STEP_SUMMARY
-          echo "- O arquivo de entrada para IA também foi gerado." >> $GITHUB_STEP_SUMMARY
+      - name: Rodar análise com IA
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python ai_analysis.py
 
-      - name: Salvar relatório de segurança
+      - name: Salvar relatório final
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-seguranca
-          path: reports/credential_report.json
-
-      - name: Salvar entrada da IA
-        uses: actions/upload-artifact@v4
-        with:
-          name: entrada-ia
-          path: reports/ai_input.txt
+          name: relatorio-final-ia
+          path: reports/final_report.txt
