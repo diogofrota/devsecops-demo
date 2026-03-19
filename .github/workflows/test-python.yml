@@ -40,3 +40,10 @@ jobs:
         with:
           name: relatorio-final-ia
           path: reports/final_report.txt
+
+          - name: Enviar relatório por e-mail
+            env:
+              EMAIL_USER: ${{ secrets.EMAIL_USER }}
+              EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+              EMAIL_TO: ${{ secrets.EMAIL_TO }}
+            run: python send_email.py
