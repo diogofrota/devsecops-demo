@@ -1,8 +1,26 @@
 import os
 import time
+import warnings
 from pathlib import Path
 
 from openai import OpenAI
+
+warnings.filterwarnings(
+    "ignore",
+    message=r".*Assistants API is deprecated in favor of the Responses API.*",
+    category=DeprecationWarning,
+)
+
+
+def log_step(message: str) -> None:
+    print(f"[STEP] {message}")
+
+
+def short_error_reason(error: Exception) -> str:
+    message = str(error).replace("\n", " ")
+    if "No assistant found" in message or "Error code: 404" in message:
+        return "assistant nao encontrado para CLOUD_ASSISTANT_ID"
+    return error.__class__.__name__
 
 
 def extract_response_text(response) -> str:
@@ -84,24 +102,27 @@ def main() -> None:
     assistant_id = os.getenv("CLOUD_ASSISTANT_ID", "").strip()
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    print("[INFO] Enviando dados para analise CSPM com IA...")
+    log_step("Iniciando analise CSPM com IA")
     if assistant_id:
-        print("[INFO] Usando Assistant configurado via CLOUD_ASSISTANT_ID.")
+        log_step("Tentando usar Assistant (CLOUD_ASSISTANT_ID)")
         try:
             result = analyze_with_assistant(client, assistant_id, content)
+            log_step("Analise concluida via Assistant")
         except Exception as error:
-            print(
-                "[WARN] Falha ao usar Assistant. "
-                f"Fallback para Responses API. Motivo: {error}"
+            log_step(
+                "Assistant indisponivel; fallback para Responses API "
+                f"({short_error_reason(error)})"
             )
             result = analyze_with_responses(client, content)
+            log_step("Analise concluida via Responses API")
     else:
-        print("[INFO] CLOUD_ASSISTANT_ID nao definido. Usando Responses API.")
+        log_step("CLOUD_ASSISTANT_ID nao definido; usando Responses API")
         result = analyze_with_responses(client, content)
+        log_step("Analise concluida via Responses API")
 
     reports_dir.mkdir(parents=True, exist_ok=True)
     output_path.write_text(result, encoding="utf-8")
-    print(f"[INFO] Analise CSPM concluida. Relatorio salvo em {output_path}")
+    log_step(f"Relatorio salvo em {output_path}")
 
 
 if __name__ == "__main__":

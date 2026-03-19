@@ -1,8 +1,28 @@
 import os
 import time
+import warnings
 from pathlib import Path
 
 from openai import OpenAI
+
+warnings.filterwarnings(
+    "ignore",
+    message=r".*Assistants API is deprecated in favor of the Responses API.*",
+    category=DeprecationWarning,
+)
+
+
+def log_step(message: str) -> None:
+    print(f"[STEP] {message}")
+
+
+def short_error_reason(error: Exception) -> str:
+    message = str(error).replace("\n", " ")
+    if "No assistant found" in message or "Error code: 404" in message:
+        return "assistant nao encontrado para DEVSECOPS_ASSISTANT_ID"
+    if isinstance(error, TimeoutError):
+        return message or "assistant sem resposta"
+    return error.__class__.__name__
 
 
 def extract_response_text(response) -> str:
@@ -52,7 +72,12 @@ def extract_assistant_message(messages) -> str:
     return ""
 
 
-def analyze_with_assistant(client: OpenAI, assistant_id: str, content: str) -> str:
+def analyze_with_assistant(
+    client: OpenAI,
+    assistant_id: str,
+    content: str,
+    timeout_seconds: int = 120,
+) -> str:
     thread = client.beta.threads.create()
     client.beta.threads.messages.create(
         thread_id=thread.id,
@@ -64,7 +89,12 @@ def analyze_with_assistant(client: OpenAI, assistant_id: str, content: str) -> s
         thread_id=thread.id,
         assistant_id=assistant_id,
     )
+    started_at = time.time()
     while run.status in {"queued", "in_progress"}:
+        if time.time() - started_at >= timeout_seconds:
+            raise TimeoutError(
+                f"assistant sem resposta apos {timeout_seconds}s"
+            )
         time.sleep(2)
         run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
 
@@ -99,28 +129,40 @@ def main() -> None:
 
     content = input_path.read_text(encoding="utf-8")
     assistant_id = os.getenv("DEVSECOPS_ASSISTANT_ID", "").strip()
+    assistant_timeout_seconds = int(
+        os.getenv("DEVSECOPS_ASSISTANT_TIMEOUT_SECONDS", "120")
+    )
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    print("[INFO] Enviando dados para analise DevSecOps com IA...")
+    log_step("Iniciando analise DevSecOps com IA")
     if assistant_id:
-        print("[INFO] Usando Assistant configurado via DEVSECOPS_ASSISTANT_ID.")
+        log_step(
+            "Tentando usar Assistant (DEVSECOPS_ASSISTANT_ID) "
+            f"com timeout de {assistant_timeout_seconds}s"
+        )
         try:
-            result = analyze_with_assistant(client, assistant_id, content)
+            result = analyze_with_assistant(
+                client=client,
+                assistant_id=assistant_id,
+                content=content,
+                timeout_seconds=assistant_timeout_seconds,
+            )
+            log_step("Analise concluida via Assistant")
         except Exception as error:
-            print(
-                "[WARN] Falha ao usar Assistant. "
-                f"Fallback para Responses API. Motivo: {error}"
+            log_step(
+                "Assistant indisponivel; fallback para Responses API "
+                f"({short_error_reason(error)})"
             )
             result = analyze_with_responses(client, content)
+            log_step("Analise concluida via Responses API")
     else:
-        print("[INFO] DEVSECOPS_ASSISTANT_ID nao definido. Usando Responses API.")
+        log_step("DEVSECOPS_ASSISTANT_ID nao definido; usando Responses API")
         result = analyze_with_responses(client, content)
+        log_step("Analise concluida via Responses API")
 
     reports_dir.mkdir(parents=True, exist_ok=True)
     output_path.write_text(result, encoding="utf-8")
-
-    print(f"[INFO] Analise DevSecOps concluida. Relatorio salvo em {output_path}")
-    print(result)
+    log_step(f"Relatorio salvo em {output_path}")
 
 
 if __name__ == "__main__":
