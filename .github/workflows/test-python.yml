@@ -32,6 +32,7 @@ jobs:
       - name: Rodar análise IA DevSecOps
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEVSECOPS_ASSISTANT_ID: ${{ secrets.DEVSECOPS_ASSISTANT_ID }}
         run: python devSecOps/ai_analysis.py
 
       - name: Rodar scanner Cloud Security

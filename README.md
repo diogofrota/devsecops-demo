@@ -128,16 +128,20 @@ Responsabilidade:
 
 Responsabilidade:
 1. Ler `${REPORTS_DIR}/ai_input.txt`.
-2. Chamar `client.responses.create(...)` com modelo `gpt-4.1-mini`.
-3. Salvar resposta final em `${REPORTS_DIR}/final_report.txt`.
+2. Priorizar uso de Assistant API se `DEVSECOPS_ASSISTANT_ID` estiver definido.
+3. Em falha do assistant, fazer fallback automatico para Responses API.
+4. Salvar resposta final em `${REPORTS_DIR}/final_report.txt`.
 
-Trecho relevante:
+Trecho de decisao:
 
 ```python
-response = client.responses.create(
-    model="gpt-4.1-mini",
-    input=build_prompt(content),
-)
+if assistant_id:
+    try:
+        result = analyze_with_assistant(client, assistant_id, content)
+    except Exception:
+        result = analyze_with_responses(client, content)
+else:
+    result = analyze_with_responses(client, content)
 ```
 
 ### 4) cloudSecurity/cspm_scan.py
@@ -220,6 +224,7 @@ Arquivos esperados para anexar:
 
 | Nome | Uso |
 |---|---|
+| `DEVSECOPS_ASSISTANT_ID` | ativa fluxo via Assistant API no devSecOps |
 | `CLOUD_ASSISTANT_ID` | ativa fluxo via Assistant API no cloudSecurity |
 
 ### Variaveis de ambiente opcionais
@@ -250,7 +255,7 @@ Mesmo com foco em CI, voce pode reproduzir local para estudo:
 export REPORTS_DIR=/tmp/security-reports
 python3 devSecOps/scan.py
 python3 devSecOps/prepare_ai_input.py
-OPENAI_API_KEY=... python3 devSecOps/ai_analysis.py
+OPENAI_API_KEY=... DEVSECOPS_ASSISTANT_ID=... python3 devSecOps/ai_analysis.py
 python3 cloudSecurity/cspm_scan.py
 python3 cloudSecurity/prepare_ai_input.py
 OPENAI_API_KEY=... CLOUD_ASSISTANT_ID=... python3 cloudSecurity/ai_analysis.py
@@ -289,6 +294,12 @@ Checklist:
 Comportamento esperado:
 1. O script tenta Assistant API.
 2. Em erro, cai para Responses API sem interromper o fluxo cloud.
+
+### 5) Falha no assistant devsecops
+
+Comportamento esperado:
+1. O script tenta Assistant API.
+2. Em erro, cai para Responses API sem interromper o fluxo devsecops.
 
 ## Limites Conhecidos
 
