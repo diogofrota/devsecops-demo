@@ -1,4 +1,4 @@
-name: DevSecOps Pipeline
+name: DevSecOps and CloudSecurity Pipeline
 
 on:
   push:
@@ -8,6 +8,8 @@ on:
 jobs:
   security-check:
     runs-on: ubuntu-latest
+    env:
+      REPORTS_DIR: ${{ runner.temp }}/security-reports
 
     steps:
       - name: Checkout código
@@ -21,27 +23,40 @@ jobs:
       - name: Instalar dependências
         run: pip install openai
 
-      - name: Criar pasta de relatórios
-        run: mkdir -p reports
+      - name: Rodar scanner DevSecOps
+        run: python devSecOps/scan.py
 
-      - name: Rodar scanner
-        run: python scan.py
+      - name: Preparar entrada da IA DevSecOps
+        run: python devSecOps/prepare_ai_input.py
 
-      - name: Preparar entrada da IA
-        run: python prepare_ai_input.py
-
-      - name: Rodar análise com IA
+      - name: Rodar análise IA DevSecOps
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python ai_analysis.py
+        run: python devSecOps/ai_analysis.py
 
-      - name: Salvar relatório final
+      - name: Rodar scanner Cloud Security
+        run: python cloudSecurity/cspm_scan.py
+
+      - name: Preparar entrada da IA Cloud Security
+        run: python cloudSecurity/prepare_ai_input.py
+
+      - name: Rodar análise IA Cloud Security
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CLOUD_ASSISTANT_ID: ${{ secrets.CLOUD_ASSISTANT_ID }}
+        run: python cloudSecurity/ai_analysis.py
+
+      - name: Salvar relatórios
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-final-ia
-          path: reports/final_report.txt
+          name: relatorios-seguranca
+          path: |
+            ${{ env.REPORTS_DIR }}/final_report.txt
+            ${{ env.REPORTS_DIR }}/cloud_final_report.txt
+            ${{ env.REPORTS_DIR }}/credential_report.json
+            ${{ env.REPORTS_DIR }}/cloud_report.json
 
-      - name: Enviar relatório por e-mail
+      - name: Enviar relatórios por e-mail
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}

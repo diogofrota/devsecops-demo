@@ -1,0 +1,39 @@
+{
+  "provider": "aws",
+  "resources": [
+    {
+      "type": "s3_bucket",
+      "name": "vinicola-pedidos",
+      "public_read": true,
+      "encryption_enabled": false,
+      "logging_enabled": false
+    },
+    {
+      "type": "security_group",
+      "name": "web-sg",
+      "inbound_rules": [
+        {
+          "port": 22,
+          "source": "0.0.0.0/0"
+        },
+        {
+          "port": 80,
+          "source": "0.0.0.0/0"
+        }
+      ]
+    },
+    {
+      "type": "rds_instance",
+      "name": "pedidos-db",
+      "storage_encrypted": false,
+      "public_access": true,
+      "backup_enabled": false
+    },
+    {
+      "type": "iam_user",
+      "name": "admin-vinicola",
+      "mfa_enabled": false,
+      "admin_access": true
+    }
+  ]
+}
