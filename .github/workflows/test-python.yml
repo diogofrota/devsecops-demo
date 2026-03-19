@@ -9,7 +9,7 @@ jobs:
   security-check:
     runs-on: ubuntu-latest
     env:
-      REPORTS_DIR: ${{ runner.temp }}/security-reports
+      REPORTS_DIR: /tmp/security-reports
 
     steps:
       - name: Checkout código
