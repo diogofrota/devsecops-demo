@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinícola Agnello | Upload de Documentos</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap");
+
+    :root {
+      --bg-overlay-a: rgba(17, 24, 39, 0.84);
+      --bg-overlay-b: rgba(17, 24, 39, 0.92);
+      --panel-bg: rgba(15, 23, 42, 0.74);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-soft: #d1d5db;
+      --text-muted: #9ca3af;
+      --gold-soft: #f5d38a;
+      --wine-1: #7a1f2b;
+      --wine-2: #b33951;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --card-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        linear-gradient(var(--bg-overlay-a), var(--bg-overlay-b)),
+        url("https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat fixed;
+      color: var(--text-main);
+      padding: 28px;
+    }
+
+    .app-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    /* Navegação principal com os dois módulos do sistema */
+    .topbar {
+      backdrop-filter: blur(10px);
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .brand strong {
+      font-family: "Cormorant Garamond", "Garamond", "Palatino Linotype", serif;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 0.95;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .brand span {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: bold;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .menu a:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .menu a.active {
+      background: linear-gradient(90deg, var(--wine-1), var(--wine-2));
+      border-color: transparent;
+    }
+
+    .hero {
+      padding: 28px;
+      border-radius: 22px;
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.72);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero h1 {
+      font-size: 34px;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      color: var(--text-soft);
+      line-height: 1.7;
+      font-size: 17px;
+      max-width: 860px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: start;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22);
+    }
+
+    .panel h2 {
+      font-size: 25px;
+      margin-bottom: 8px;
+    }
+
+    .panel p {
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #e5e7eb;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input::file-selector-button {
+      margin-right: 10px;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      margin-top: 4px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--wine-1), var(--wine-2));
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .card-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .info-card {
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: var(--card-bg);
+      padding: 14px;
+      line-height: 1.65;
+      font-size: 14px;
+      color: #e5e7eb;
+    }
+
+    .info-card strong {
+      color: #fff;
+    }
+
+    /* Cartão de postura CSPM com destaque visual de risco */
+    .security-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 14px;
+    }
+
+    .security-item .label {
+      color: #e5e7eb;
+      font-weight: bold;
+    }
+
+    .security-item .risk-critical {
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.45);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-weight: bold;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .security-item .risk-high {
+      color: #fde68a;
+      background: rgba(120, 53, 15, 0.45);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-weight: bold;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .analysis-block {
+      margin-top: 14px;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      border-radius: 14px;
+      background: rgba(127, 29, 29, 0.2);
+      padding: 14px;
+    }
+
+    .analysis-block h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #fecaca;
+    }
+
+    .analysis-block ul {
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+      color: #fee2e2;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .output-box {
+      margin-top: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(2, 6, 23, 0.65);
+      padding: 14px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .success-note {
+      margin-top: 10px;
+      color: #bbf7d0;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 1080px) {
+      body {
+        padding: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 12px;
+      }
+
+      .topbar {
+        padding: 14px;
+      }
+
+      .menu {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .menu a {
+        text-align: center;
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+
+      .hero {
+        padding: 18px;
+      }
+
+      .hero h1 {
+        font-size: 24px;
+      }
+
+      .hero p {
+        font-size: 15px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .panel h2 {
+        font-size: 24px;
+      }
+
+      .brand strong {
+        font-size: 30px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .menu {
+        grid-template-columns: 1fr;
+      }
+
+      .brand strong {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <strong>Vinícola Agnello</strong>
+      </div>
+      <nav class="menu" aria-label="Navegação principal">
+        <a href="index.html">Consulta de Pedidos</a>
+        <a class="active" href="upload.html">Upload de Documentos</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+       
+        <h2>Formulário de Upload</h2>
+
+        <p>Envio de documentos comerciais armazenados em ambiente cloud (S3).</p>
+
+        <!-- Formulário de upload (simulação visual sem backend) -->
+        <form id="uploadForm" class="form-grid">
+          <div class="form-group">
+            <label for="docNome">Nome do documento</label>
+            <input id="docNome" type="text" placeholder="Ex.: NF-2026-000321" required />
+          </div>
+
+          <div class="form-group">
+            <label for="docTipo">Tipo</label>
+            <select id="docTipo" required>
+              <option value="">Selecione</option>
+              <option>Nota Fiscal</option>
+              <option>Contrato</option>
+              <option>Relatório</option>
+              <option>Outro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="docSetor">Setor</label>
+            <select id="docSetor" required>
+              <option value="">Selecione</option>
+              <option>Comercial</option>
+              <option>Logística</option>
+              <option>Financeiro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="docArquivo">Arquivo</label>
+            <input id="docArquivo" type="file" required />
+          </div>
+
+          <button class="btn-primary" type="submit">Enviar documento</button>
+        </form>
+
+        <p id="uploadFeedback" class="success-note" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Simula submissão de documento no formulário sem backend
+    const uploadForm = document.getElementById("uploadForm");
+    const feedback = document.getElementById("uploadFeedback");
+
+    uploadForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const nome = document.getElementById("docNome").value.trim();
+      const tipo = document.getElementById("docTipo").value;
+      const setor = document.getElementById("docSetor").value;
+      const arquivo = document.getElementById("docArquivo").files[0];
+
+      if (!nome || !tipo || !setor || !arquivo) {
+        feedback.textContent = "Preencha todos os campos antes de enviar.";
+        feedback.style.color = "#fecaca";
+        return;
+      }
+
+      feedback.textContent = "Documento enviado com sucesso para fila de análise de segurança.";
+      feedback.style.color = "#bbf7d0";
+      uploadForm.reset();
+    });
+  </script>
+</body>
+</html>
