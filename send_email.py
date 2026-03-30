@@ -97,17 +97,18 @@ def build_plain_body(reports_dir: Path, overview: dict) -> str:
 
 def severity_badges_html(severity_counts: dict) -> str:
     styles = {
-        "critical": ("#7f1d1d", "#fecaca", "CRITICO"),
-        "high": ("#78350f", "#fde68a", "ALTO"),
-        "medium": ("#1e3a8a", "#bfdbfe", "MEDIO"),
-        "low": ("#14532d", "#bbf7d0", "BAIXO"),
+        "critical": ("#ffffff", "#111111", "CRITICO"),
+        "high": ("#ffffff", "#111111", "ALTO"),
+        "medium": ("#ffffff", "#111111", "MEDIO"),
+        "low": ("#ffffff", "#111111", "BAIXO"),
     }
     parts = []
     for key in ("critical", "high", "medium", "low"):
         bg, fg, label = styles[key]
         parts.append(
             f"<span style='display:inline-block;padding:6px 10px;border-radius:999px;"
-            f"background:{bg};color:{fg};font-size:12px;font-weight:700;margin:2px;'>"
+            f"background:{bg};color:{fg};font-size:12px;font-weight:700;margin:2px;"
+            f"border:1px solid #000000;'>"
             f"{label}: {severity_counts[key]}</span>"
         )
     return "".join(parts)
@@ -116,12 +117,12 @@ def severity_badges_html(severity_counts: dict) -> str:
 def to_pre_html(content: str) -> str:
     if not content:
         return (
-            "<div style='padding:10px;background:#0b1220;border:1px solid #23324a;"
-            "border-radius:10px;color:#cbd5e1;'>Relatorio nao encontrado.</div>"
+            "<div style='padding:10px;background:#ffffff;border:1px solid #000000;"
+            "border-radius:10px;color:#111111;'>Relatorio nao encontrado.</div>"
         )
     return (
-        "<div style='padding:12px;background:#0b1220;border:1px solid #23324a;"
-        "border-radius:10px;color:#cbd5e1;white-space:pre-wrap;line-height:1.55;'>"
+        "<div style='padding:12px;background:#ffffff;border:1px solid #000000;"
+        "border-radius:10px;color:#111111;white-space:pre-wrap;line-height:1.55;'>"
         f"{html.escape(content)}"
         "</div>"
     )
@@ -136,44 +137,44 @@ def build_html_body(reports_dir: Path, overview: dict) -> str:
     return f"""\
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <body style="margin:0;padding:24px;background:#0f172a;font-family:Arial,Helvetica,sans-serif;color:#e2e8f0;">
+  <body style="margin:0;padding:24px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;color:#111111;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:900px;margin:0 auto;">
       <tr>
-        <td style="background:#111827;border:1px solid #23324a;border-radius:14px;padding:20px;">
-          <h1 style="margin:0 0 8px;font-size:24px;color:#f8fafc;">Relatorio do Agente IA de Seguranca</h1>
-          <p style="margin:0;color:#94a3b8;font-size:13px;">Pipeline DevSecOps + Cloud Security | {created_at}</p>
+        <td style="background:#ffffff;border:1px solid #000000;border-radius:14px;padding:20px;">
+          <h1 style="margin:0 0 8px;font-size:24px;color:#111111;">Relatorio do Agente IA de Seguranca</h1>
+          <p style="margin:0;color:#333333;font-size:13px;">Pipeline DevSecOps + Cloud Security | {created_at}</p>
         </td>
       </tr>
       <tr><td style="height:12px;"></td></tr>
       <tr>
-        <td style="background:#111827;border:1px solid #23324a;border-radius:14px;padding:18px;">
-          <h2 style="margin:0 0 10px;font-size:18px;color:#f8fafc;">Resumo Executivo</h2>
-          <p style="margin:0 0 8px;color:#cbd5e1;">
+        <td style="background:#ffffff;border:1px solid #000000;border-radius:14px;padding:18px;">
+          <h2 style="margin:0 0 10px;font-size:18px;color:#111111;">Resumo Executivo</h2>
+          <p style="margin:0 0 8px;color:#111111;">
             Total de achados: <strong>{overview['total_findings']}</strong> |
             DevSecOps: <strong>{overview['dev_findings']}</strong> |
             Cloud Security: <strong>{overview['cloud_findings']}</strong>
           </p>
-          <p style="margin:0 0 12px;color:#cbd5e1;">Status cloud: <strong>{html.escape(str(overview['cloud_status']))}</strong></p>
+          <p style="margin:0 0 12px;color:#111111;">Status cloud: <strong>{html.escape(str(overview['cloud_status']))}</strong></p>
           <div>{badges}</div>
         </td>
       </tr>
       <tr><td style="height:12px;"></td></tr>
       <tr>
-        <td style="background:#111827;border:1px solid #23324a;border-radius:14px;padding:18px;">
-          <h2 style="margin:0 0 10px;font-size:18px;color:#f8fafc;">Analise IA - DevSecOps</h2>
+        <td style="background:#ffffff;border:1px solid #000000;border-radius:14px;padding:18px;">
+          <h2 style="margin:0 0 10px;font-size:18px;color:#111111;">Analise IA - DevSecOps</h2>
           {to_pre_html(dev_report)}
         </td>
       </tr>
       <tr><td style="height:12px;"></td></tr>
       <tr>
-        <td style="background:#111827;border:1px solid #23324a;border-radius:14px;padding:18px;">
-          <h2 style="margin:0 0 10px;font-size:18px;color:#f8fafc;">Analise IA - Cloud Security</h2>
+        <td style="background:#ffffff;border:1px solid #000000;border-radius:14px;padding:18px;">
+          <h2 style="margin:0 0 10px;font-size:18px;color:#111111;">Analise IA - Cloud Security</h2>
           {to_pre_html(cloud_report)}
         </td>
       </tr>
       <tr><td style="height:12px;"></td></tr>
       <tr>
-        <td style="color:#94a3b8;font-size:12px;text-align:center;">
+        <td style="color:#444444;font-size:12px;text-align:center;">
           Mensagem automatica da pipeline de seguranca.
         </td>
       </tr>
